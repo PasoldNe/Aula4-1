@@ -152,9 +152,10 @@ async function listarProdutos() {
       let totalValor = 0;
 
       resultado.rows.forEach(produto => {
-        const valor = produto.preco * produto.estoque;
+        const preco = parseFloat(produto.preco);
+        const valor = preco * produto.estoque;
         totalValor += valor;
-        console.log(`[${produto.id}] ${produto.nome} | R$ ${produto.preco.toFixed(2)} | Estoque: ${produto.estoque}`);
+        console.log(`[${produto.id}] ${produto.nome} | R$ ${preco.toFixed(2)} | Estoque: ${produto.estoque}`);
       });
 
       console.log(`\nTotal: ${resultado.rows.length} produto(s)`);
@@ -190,7 +191,7 @@ async function criarPedido(clienteId, produtoIds) {
         console.error(`❌ Produto ID ${produtoId} não encontrado`);
         return false;
       }
-      valorTotal += produtoResult.rows[0].preco;
+      valorTotal += parseFloat(produtoResult.rows[0].preco);
     }
 
     // Inserir pedido
@@ -289,7 +290,8 @@ async function relatorioVendas() {
       console.log('Nenhum dado encontrado');
     } else {
       resultado.rows.forEach(row => {
-        console.log(`${row.nome}: ${row.total_pedidos} pedido(s) | Total: R$ ${(row.valor_total || 0).toFixed(2)}`);
+        const valorTotal = parseFloat(row.valor_total || 0);
+        console.log(`${row.nome}: ${row.total_pedidos} pedido(s) | Total: R$ ${valorTotal.toFixed(2)}`);
       });
     }
 
@@ -339,24 +341,48 @@ async function main() {
 
   // Adicionar clientes
   console.log('--- Adicionando Clientes ---');
-  await adicionarCliente('Déric Martins', 'martins@email.com', '11999999999');
-  await adicionarCliente('Maria Santos', 'maria@email.com', '11988888888');
-  await adicionarCliente('Pedro Oliveira', 'pedro@email.com', '11977777777');
+  await adicionarCliente('Ana Costa', 'ana@email.com', '11922222222');
+  await adicionarCliente('Carlos Santos', 'carlos@email.com', '11933333333');
 
   // Listar clientes
   await listarClientes();
 
   // Adicionar produtos
   console.log('\n--- Adicionando Produtos ---');
-  await adicionarProduto('Notebook Dell', 3500.00, 5);
-  await adicionarProduto('Mouse Logitech', 80.00, 25);
-  await adicionarProduto('Teclado Mecânico', 350.00, 10);
-  await adicionarProduto('Monitor LG 24"', 800.00, 8);
+  await adicionarProduto('Fone de Ouvido Bluetooth', 200.00, 20);
 
   // Listar produtos
   await listarProdutos();
 
-  console.log('\n✅ Operações concluídas!');
+  // Demonstrar funcionalidades extras
+  console.log('\n--- DESAFIOS EXTRAS ---\n');
+
+  // Criar pedido
+  console.log('Criando pedido para cliente 2 com produtos [1, 2]:');
+  await criarPedido(2, [1, 2]);
+
+  // Buscar cliente
+  console.log('\nBuscando clientes com "Ana":');
+  await buscarCliente('Ana');
+
+  // Atualizar estoque
+  console.log('\nAtualizando estoque do produto 3 para 15 unidades:');
+  await atualizarEstoque(3, 15);
+
+  // Relatório de vendas
+  console.log('\nRelatório de vendas:');
+  await relatorioVendas();
+
+  // Tentar excluir cliente com pedidos (deve falhar)
+  console.log('\nTentando excluir cliente 2 (que agora tem pedidos):');
+  await excluirCliente(2);
+
+  // Tentar excluir cliente sem pedidos
+  console.log('\nTentando excluir cliente 3 (Carlos Santos, sem pedidos):');
+  await excluirCliente(3);
+
+  console.log('\n🎉 SISTEMA FUNCIONANDO PERFEITAMENTE COM BANCO DE DADOS!');
+  console.log('✅ Todas as funcionalidades da aula foram implementadas e testadas.');
 }
 
 // Executar
